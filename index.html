@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pakistani Akinator Adaptive</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 1rem 2rem 3rem;
+    background: linear-gradient(135deg, #009933, #004d00);
+    color: #fff;
+    text-align: center;
+    user-select: none;
+  }
+  h1 {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  #question {
+    font-size: 1.4rem;
+    margin: 2rem 0 2rem;
+    min-height: 70px;
+    transition: opacity 0.3s ease;
+  }
+  button {
+    background: #fff;
+    border: none;
+    border-radius: 30px;
+    color: #004d00;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.7rem 1.6rem;
+    margin: 0.4rem 0.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: background 0.3s, transform 0.2s;
+    min-width: 120px;
+  }
+  button:hover:not(:disabled) {
+    background: #ccffcc;
+    transform: scale(1.05);
+  }
+  button:disabled {
+    cursor: default;
+    opacity: 0.6;
+    transform: none;
+  }
+  #result {
+    margin-top: 2.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    min-height: 60px;
+    text-shadow: 0 0 7px rgba(255,255,255,0.8);
+  }
+  #playAgainBtn {
+    margin-top: 2rem;
+    background: #00cc44;
+    color: white;
+    box-shadow: 0 6px 20px rgba(0,204,68,0.6);
+  }
+  #playAgainBtn:hover {
+    background: #33ff66;
+  }
+</style>
+</head>
+<body>
+
+<h1>🇵🇰 Pakistani Akinator Adaptive 🇵🇰</h1>
+<div id="question">Loading...</div>
+
+<div>
+  <button id="yesBtn">Yes</button>
+  <button id="noBtn">No</button>
+  <button id="idkBtn">I Don't Know</button>
+  <button id="probablyBtn">Probably</button>
+  <button id="probablyNotBtn">Probably Not</button>
+</div>
+
+<div id="result"></div>
+<button id="playAgainBtn" style="display:none;">Play Again</button>
+
+<script>
+  const characters = [
+    // Politicians
+    { name: "Imran Khan", profession: "politician", region: "Punjab", known_for: "cricket", gender: "male" },
+    { name: "Benazir Bhutto", profession: "politician", region: "Sindh", known_for: "prime minister", gender: "female" },
+    { name: "Nawaz Sharif", profession: "politician", region: "Punjab", known_for: "prime minister", gender: "male" },
+    { name: "Asif Ali Zardari", profession: "politician", region: "Sindh", known_for: "president", gender: "male" },
+    { name: "Bilawal Bhutto Zardari", profession: "politician", region: "Sindh", known_for: "political leader", gender: "male" },
+
+    // Activists & Social Workers
+    { name: "Malala Yousafzai", profession: "activist", region: "Khyber Pakhtunkhwa", known_for: "education", gender: "female" },
+    { name: "Abdul Sattar Edhi", profession: "philanthropist", region: "Sindh", known_for: "humanitarian", gender: "male" },
+    { name: "Iqbal Masih", profession: "activist", region: "Punjab", known_for: "child labor activism", gender: "male" },
+
+    // Artists & Musicians
+    { name: "Nusrat Fateh Ali Khan", profession: "singer", region: "Punjab", known_for: "qawwali", gender: "male" },
+    { name: "Atif Aslam", profession: "singer", region: "Punjab", known_for: "pop music", gender: "male" },
+    { name: "Qurat-ul-Ain Balouch", profession: "singer", region: "Sindh", known_for: "folk music", gender: "female" },
+    { name: "Abida Parveen", profession: "singer", region: "Sindh", known_for: "sufi music", gender: "female" },
+    { name: "Mehdi Hassan", profession: "singer", region: "Punjab", known_for: "ghazal", gender: "male" },
+
+    // Sports
+    { name: "Wasim Akram", profession: "cricketer", region: "Punjab", known_for: "fast bowling", gender: "male" },
+    { name: "Jahangir Khan", profession: "sportsman", region: "Punjab", known_for: "squash", gender: "male" },
+    { name: "Sania Mirza", profession: "tennis player", region: "Sindh", known_for: "tennis", gender: "female" },
+
+    // Scientists & Tech
+    { name: "Abdus Salam", profession: "scientist", region: "Punjab", known_for: "physics", gender: "male" },
+    { name: "Arfa Karim", profession: "computer prodigy", region: "Punjab", known_for: "technology", gender: "female" },
+
+    // Writers & Poets
+    { name: "Faiz Ahmed Faiz", profession: "poet", region: "Punjab", known_for: "literature", gender: "male" },
+    { name: "Allama Iqbal", profession: "poet", region: "Punjab", known_for: "philosophy", gender: "male" },
+
+    // Actors
+    { name: "Mahira Khan", profession: "actor", region: "Sindh", known_for: "drama", gender: "female" },
+    { name: "Fawad Khan", profession: "actor", region: "Punjab", known_for: "drama", gender: "male" },
+
+    // Historical Figures
+    { name: "Liaquat Ali Khan", profession: "politician", region: "Punjab", known_for: "first prime minister", gender: "male" },
+    { name: "Fatima Jinnah", profession: "politician", region: "Sindh", known_for: "mohammad ali jinnah's sister", gender: "female" }
+  ];
+
+  const questions = [
+    { trait: "gender", value: "male", question: "Is your character male?" },
+    { trait: "gender", value: "female", question: "Is your character female?" },
+    { trait: "profession", value: "politician", question: "Is your character a politician?" },
+    { trait: "profession", value: "singer", question: "Is your character a singer?" },
+    { trait: "profession", value: "cricketer", question: "Is your character a cricketer?" },
+    { trait: "profession", value: "poet", question: "Is your character a poet?" },
+    { trait: "profession", value: "activist", question: "Is your character an activist?" },
+    { trait: "profession", value: "philanthropist", question: "Is your character a philanthropist?" },
+    { trait: "profession", value: "computer prodigy", question: "Is your character known for technology or computers?" },
+    { trait: "profession", value: "scientist", question: "Is your character a scientist?" },
+    { trait: "profession", value: "actor", question: "Is your character an actor?" },
+    { trait: "profession", value: "sportsman", question: "Is your character a sportsman?" },
+    { trait: "profession", value: "tennis player", question: "Is your character a tennis player?" },
+
+    { trait: "region", value: "Punjab", question: "Is your character from Punjab?" },
+    { trait: "region", value: "Sindh", question: "Is your character from Sindh?" },
+    { trait: "region", value: "Khyber Pakhtunkhwa", question: "Is your character from Khyber Pakhtunkhwa?" },
+
+    { trait: "known_for", value: "cricket", question: "Is your character famous for cricket?" },
+    { trait: "known_for", value: "education", question: "Is your character famous for education activism?" },
+    { trait: "known_for", value: "qawwali", question: "Is your character famous for Qawwali music?" },
+    { trait: "known_for", value: "prime minister", question: "Has your character served as Prime Minister?" },
+    { trait: "known_for", value: "pop music", question: "Is your character famous for pop music?" },
+    { trait: "known_for", value: "humanitarian", question: "Is your character known for humanitarian work?" },
+    { trait: "known_for", value: "fast bowling", question: "Is your character known for fast bowling?" },
+    { trait: "known_for", value: "folk music", question: "Is your character famous for folk music?" },
+    { trait: "known_for", value: "literature", question: "Is your character famous for literature or poetry?" },
+    { trait: "known_for", value: "philosophy", question: "Is your character famous for philosophy or thought?" },
+    { trait: "known_for", value: "technology", question: "Is your character famous for technology?" },
+    { trait: "known_for", value: "first prime minister", question: "Is your character the first Prime Minister of Pakistan?" },
+    { trait: "known_for", value: "drama", question: "Is your character famous for drama or acting?" },
+    { trait: "known_for", value: "child labor activism", question: "Is your character known for child labor activism?" },
+    { trait: "known_for", value: "president", question: "Has your character served as President?" },
+    { trait: "known_for", value: "squash", question: "Is your character famous for squash?" },
+    { trait: "known_for", value: "tennis", question: "Is your character famous for tennis?" },
+    { trait: "known_for", value: "mohammad ali jinnah's sister", question: "Is your character known as Muhammad Ali Jinnah's sister?" }
+  ];
+
+  const answerWeights = {
+    "yes": 1,
+    "probably": 0.75,
+    "idk": 0.5,
+    "probablyNot": 0.25,
+    "no": 0
+  };
+
+  let possibleCharacters;
+  let askedQuestions;
+  let currentQuestion;
+
+  const questionDiv = document.getElementById("question");
+  const resultDiv = document.getElementById("result");
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const idkBtn = document.getElementById("idkBtn");
+  const probablyBtn = document.getElementById("probablyBtn");
+  const probablyNotBtn = document.getElementById("probablyNotBtn");
+  const playAgainBtn = document.getElementById("playAgainBtn");
+
+  function startGame() {
+    possibleCharacters = [...characters];
+    askedQuestions = new Set();
+    resultDiv.textContent = "";
+    playAgainBtn.style.display = "none";
+    enableButtons(true);
+    nextQuestion();
+  }
+
+  function enableButtons(enable) {
+    yesBtn.disabled = !enable;
+    noBtn.disabled = !enable;
+    idkBtn.disabled = !enable;
+    probablyBtn.disabled = !enable;
+    probablyNotBtn.disabled = !enable;
+  }
+
+  // Choose the question that best splits the remaining characters
+  function chooseBestQuestion() {
+    const remainingQuestions = questions.filter(q => !askedQuestions.has(q.question));
+    if (remainingQuestions.length === 0) return null;
+
+    let bestQuestion = null;
+    let bestScore = -1;
+
+    for (const q of remainingQuestions) {
+      let matchCount = 0;
+      let noMatchCount = 0;
+
+      possibleCharacters.forEach(c => {
+        if (c[q.trait] && c[q.trait].toLowerCase() === q.value.toLowerCase()) {
+          matchCount++;
+        } else {
+          noMatchCount++;
+        }
+      });
+
+      const total = matchCount + noMatchCount;
+      if (total === 0) continue;
+
+      const balance = Math.min(matchCount, noMatchCount) / total;
+
+      if (balance > bestScore) {
+        bestScore = balance;
+        bestQuestion = q;
+      }
+    }
+    return bestQuestion;
+  }
+
+  function nextQuestion() {
+    if (possibleCharacters.length === 0) {
+      questionDiv.textContent = "";
+      resultDiv.textContent = "No matching character found. Try again!";
+      enableButtons(false);
+      playAgainBtn.style.display = "inline-block";
+      return;
+    }
+
+    if (possibleCharacters.length === 1) {
+      questionDiv.textContent = "";
+      resultDiv.textContent = `I guess your character is: ${possibleCharacters[0].name} 🎉`;
+      enableButtons(false);
+      playAgainBtn.style.display = "inline-block";
+      return;
+    }
+
+    currentQuestion = chooseBestQuestion();
+
+    if (!currentQuestion) {
+      questionDiv.textContent = "";
+      const names = possibleCharacters.map(c => c.name).join(", ");
+      resultDiv.textContent = `I couldn't narrow it down further. Could it be: ${names}?`;
+      enableButtons(false);
+      playAgainBtn.style.display = "inline-block";
+      return;
+    }
+
+    askedQuestions.add(currentQuestion.question);
+    fadeOutIn(questionDiv, () => {
+      questionDiv.textContent = currentQuestion.question;
+    });
+  }
+
+  function fadeOutIn(element, callback) {
+    element.style.opacity = 0;
+    setTimeout(() => {
+      callback();
+      element.style.opacity = 1;
+    }, 300);
+  }
+
+  function answerQuestion(answerKey) {
+    if (!currentQuestion) return;
+
+    // Filter characters based on answer
+    possibleCharacters = possibleCharacters.filter(character => {
+      const traitValue = character[currentQuestion.trait];
+      const match = traitValue && traitValue.toLowerCase() === currentQuestion.value.toLowerCase();
+
+      if (answerKey === "yes" || answerKey === "probably") {
+        return match;
+      } else if (answerKey === "no" || answerKey === "probablyNot") {
+        return !match;
+      } else { // "idk"
+        return true;
+      }
+    });
+
+    nextQuestion();
+  }
+
+  yesBtn.addEventListener("click", () => answerQuestion("yes"));
+  noBtn.addEventListener("click", () => answerQuestion("no"));
+  idkBtn.addEventListener("click", () => answerQuestion("idk"));
+  probablyBtn.addEventListener("click", () => answerQuestion("probably"));
+  probablyNotBtn.addEventListener("click", () => answerQuestion("probablyNot"));
+  playAgainBtn.addEventListener("click", startGame);
+
+  startGame();
+</script>
+
+</body>
+</html>
